@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GeekBurguer.Users.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GeekBurguer.Users.Repository
 {
@@ -32,9 +33,15 @@ namespace GeekBurguer.Users.Repository
             _dbContext.SaveChanges();
         }
 
-        public bool Update(User user)
+        public bool UpdateRestricoes(User user)
         {
-            throw new NotImplementedException();
+            var userDb = GetUserById(user.Id);
+            if (userDb != null)
+            {
+                userDb.Restricoes = user.Restricoes;
+            }
+            _dbContext.Entry(userDb).State = EntityState.Modified;
+            return true;
         }
     }
 }

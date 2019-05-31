@@ -10,7 +10,7 @@ namespace GeekBurguer.Users.Repository
     {
         User GetUserById(Guid productId);
         bool Add(User product);
-        bool Update(User product);        
+        bool UpdateRestricoes(User product);        
         void Save();
     }
 }
