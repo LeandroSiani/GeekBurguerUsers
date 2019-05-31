@@ -13,4 +13,8 @@
     <PackageReference Include="Torutek.Microsoft.ProjectOxford.Face" Version="1.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\GeekBurguer.Users.Contract\GeekBurguer.Users.Contract.csproj" />
+  </ItemGroup>
+
 </Project>
