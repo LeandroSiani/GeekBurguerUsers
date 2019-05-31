@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using GeekBurguer.Users.Repository;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
@@ -9,17 +11,28 @@ namespace GeekBurguer.Users
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public static IConfiguration Configuration;
+        public IHostingEnvironment HostingEnvironment;
+
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
+            HostingEnvironment = env;
+        }        
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            var databasePath = "%DATABASEPATH%";
+            var connection = Configuration.GetConnectionString("Sqlite")
+                .Replace(databasePath, HostingEnvironment.ContentRootPath);
+
+            services.AddEntityFrameworkSqlite()
+                .AddDbContext<UsersDbContext>(o => o.UseSqlite(connection));
+
+            services.AddScoped<IUsersRepository, UsersRepository>();
 
             services.AddSwaggerGen(c =>
                 c.SwaggerDoc("v1", new Info { Title = "Users", Version = "v1" })
@@ -27,7 +40,7 @@ namespace GeekBurguer.Users
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, UsersDbContext usersDbContext)
         {
             if (env.IsDevelopment())
             {
@@ -40,6 +53,15 @@ namespace GeekBurguer.Users
             app.UseSwaggerUI(c =>
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Users")
             );
+
+            using (var serviceScope = app
+                .ApplicationServices
+                .GetService<IServiceScopeFactory>()
+                .CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<UsersDbContext>();
+                context.Database.EnsureCreated();
+            }            
         }
     }
 }
