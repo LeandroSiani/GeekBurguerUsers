@@ -6,7 +6,7 @@ namespace GeekBurguer.Users.Contract
 {
     public class UserToGet
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         public Byte[] Face { get; set; }
         public List<string> Restricoes { get; set; }
     }

@@ -19,4 +19,10 @@
     <ProjectReference Include="..\GeekBurguer.Users.Contract\GeekBurguer.Users.Contract.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

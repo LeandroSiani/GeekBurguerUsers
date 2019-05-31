@@ -1,4 +1,5 @@
 ﻿using GeekBurguer.Users.Repository;
+using GeekBurguer.Users.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -26,12 +27,13 @@ namespace GeekBurguer.Users
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             var databasePath = "%DATABASEPATH%";
-            var connection = Configuration.GetConnectionString("Sqlite")
+            var connection = Configuration.GetSection("Sqlite").Value
                 .Replace(databasePath, HostingEnvironment.ContentRootPath);
 
-            services.AddEntityFrameworkSqlite()
-                .AddDbContext<UsersDbContext>(o => o.UseSqlite(connection));
+            //services.AddEntityFrameworkSqlite()
+            //    .AddDbContext<UsersDbContext>(o => o.UseSqlite(connection));
 
+            services.AddScoped<IFacialService, FacialService>();
             services.AddScoped<IUsersRepository, UsersRepository>();
 
             services.AddSwaggerGen(c =>
@@ -40,7 +42,7 @@ namespace GeekBurguer.Users
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, UsersDbContext usersDbContext)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env/*, UsersDbContext usersDbContext*/)
         {
             if (env.IsDevelopment())
             {
@@ -54,14 +56,14 @@ namespace GeekBurguer.Users
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Users")
             );
 
-            using (var serviceScope = app
-                .ApplicationServices
-                .GetService<IServiceScopeFactory>()
-                .CreateScope())
-            {
-                var context = serviceScope.ServiceProvider.GetRequiredService<UsersDbContext>();
-                context.Database.EnsureCreated();
-            }            
+            //using (var serviceScope = app
+            //    .ApplicationServices
+            //    .GetService<IServiceScopeFactory>()
+            //    .CreateScope())
+            //{
+            //    var context = serviceScope.ServiceProvider.GetRequiredService<UsersDbContext>();
+            //    context.Database.EnsureCreated();
+            //}            
         }
     }
 }

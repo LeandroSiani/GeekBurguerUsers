@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GeekBurguer.Users.Contract;
+using GeekBurguer.Users.Repository;
 using GeekBurguer.Users.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -17,10 +18,12 @@ namespace GeekBurguer.Users.Controllers
     public class RestrictionsController : Controller
     {
         public IFacialService _facialService;
+        //public IUsersRepository _usersRepository;
 
-        public RestrictionsController(IFacialService facialService)
+        public RestrictionsController(IFacialService facialService/*, IUsersRepository usersRepository*/)
         {
             _facialService = facialService;
+            //_usersRepository = usersRepository;
         }
 
         // GET api/values
@@ -32,10 +35,13 @@ namespace GeekBurguer.Users.Controllers
 
         // POST api/values
         [HttpPost]
-        public IActionResult Post([FromQuery(Name = "image")] byte[] face)
+        //public IActionResult Post([FromQuery(Name = "image")] byte[] face)
+        public IActionResult Post([FromQuery(Name = "image")] string face)
         {
+            byte[] image = System.IO.File.ReadAllBytes("D:\\nicolascage.jpg");
+
             // verifica na api facila se tem a face eviada
-            var id = _facialService.GetFaceId(face);
+            var id = _facialService.GetFaceId(image);
 
             if (id == null)
             {
@@ -43,7 +49,15 @@ namespace GeekBurguer.Users.Controllers
             }
 
             // com o retorno da api facial busca as restrições do suuario se retornou id
-            return Ok();
+
+            // se tem restricoes
+            if (true)
+            {
+                return Ok(new UserToGet() { Id = id, Restricoes = new List<string>() });
+            }
+            else {
+                return Ok();
+            }
         }
     }
 }
