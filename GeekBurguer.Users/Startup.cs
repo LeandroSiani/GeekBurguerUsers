@@ -12,7 +12,7 @@ namespace GeekBurguer.Users
 {
     public class Startup
     {
-        public static IConfiguration Configuration;
+        public IConfiguration Configuration { get; }
         public IHostingEnvironment HostingEnvironment;
 
         public Startup(IConfiguration configuration, IHostingEnvironment env)
