@@ -11,7 +11,7 @@ namespace GeekBurguer.Users
 {
     public class Startup
     {
-        public static IConfiguration Configuration;
+        public IConfiguration Configuration { get; }
         public IHostingEnvironment HostingEnvironment;
 
         public Startup(IConfiguration configuration, IHostingEnvironment env)
@@ -26,7 +26,7 @@ namespace GeekBurguer.Users
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             var databasePath = "%DATABASEPATH%";
-            var connection = Configuration.GetConnectionString("Sqlite")
+            var connection = Configuration.GetSection("Sqlite").Value
                 .Replace(databasePath, HostingEnvironment.ContentRootPath);
 
             services.AddEntityFrameworkSqlite()

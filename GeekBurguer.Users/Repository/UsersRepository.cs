@@ -40,7 +40,7 @@ namespace GeekBurguer.Users.Repository
             {
                 userDb.Restricoes = user.Restricoes;
             }
-            _dbContext.Entry(userDb).State = EntityState.Modified;
+            _dbContext.Entry(userDb).State = EntityState.Modified;            
             return true;
         }
     }
