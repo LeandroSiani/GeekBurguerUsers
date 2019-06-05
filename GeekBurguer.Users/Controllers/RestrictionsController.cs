@@ -34,30 +34,6 @@ namespace GeekBurguer.Users.Controllers
         }
 
         // POST api/values
-        [HttpPost]
-        //public IActionResult Post([FromQuery(Name = "image")] byte[] face)
-        public IActionResult Post([FromQuery(Name = "image")] string face)
-        {
-            byte[] image = System.IO.File.ReadAllBytes("D:\\nicolascage.jpg");
-
-            // verifica na api facila se tem a face eviada
-            var id = _facialService.GetFaceId(image);
-
-            if (id == null)
-            {
-                return Ok(new { msg = "Não existe face nessa imagem" });
-            }
-
-            // com o retorno da api facial busca as restrições do suuario se retornou id
-
-            // se tem restricoes
-            if (true)
-            {
-                return Ok(new UserToGet() { Id = id, Restricoes = new List<string>() });
-            }
-            else {
-                return Ok();
-            }
-        }
+        
     }
 }

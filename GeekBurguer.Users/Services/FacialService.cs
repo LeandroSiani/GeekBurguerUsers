@@ -22,7 +22,7 @@ namespace GeekBurguer.Users.Services
 
         public Guid? GetFaceId(byte[] face)
         {
-            byte[] image = System.IO.File.ReadAllBytes("D:\\nicolascage.jpg");
+            byte[] image = System.IO.File.ReadAllBytes("D:\\nicolas.jpg");
 
             FaceListId = Guid.Empty;
 
@@ -49,7 +49,7 @@ namespace GeekBurguer.Users.Services
                 //Se nao achou nada semelhante na lista, adiciona a face atual
                 if (persistedId == null)
                 {
-                    persistedId = AddFaceAsync(FaceListId, image).Result;
+                    persistedId = AddFaceAsync(FaceListId, face).Result;
                     //Console.WriteLine($"New User with FaceId {persistedId}");
                     return persistedId;
                 }

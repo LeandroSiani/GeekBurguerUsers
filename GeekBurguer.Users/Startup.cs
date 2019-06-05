@@ -30,8 +30,8 @@ namespace GeekBurguer.Users
             var connection = Configuration.GetSection("Sqlite").Value
                 .Replace(databasePath, HostingEnvironment.ContentRootPath);
 
-            //services.AddEntityFrameworkSqlite()
-            //    .AddDbContext<UsersDbContext>(o => o.UseSqlite(connection));
+            services.AddEntityFrameworkSqlite()
+                .AddDbContext<UsersDbContext>(o => o.UseSqlite(connection));
 
             services.AddScoped<IFacialService, FacialService>();
             services.AddScoped<IUsersRepository, UsersRepository>();
@@ -56,14 +56,14 @@ namespace GeekBurguer.Users
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Users")
             );
 
-            //using (var serviceScope = app
-            //    .ApplicationServices
-            //    .GetService<IServiceScopeFactory>()
-            //    .CreateScope())
-            //{
-            //    var context = serviceScope.ServiceProvider.GetRequiredService<UsersDbContext>();
-            //    context.Database.EnsureCreated();
-            //}            
+            using (var serviceScope = app
+                .ApplicationServices
+                .GetService<IServiceScopeFactory>()
+                .CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<UsersDbContext>();
+                context.Database.EnsureCreated();
+            }            
         }
     }
 }
