@@ -35,19 +35,7 @@ namespace GeekBurguer.Users.Controllers
 
         // POST api/values
 
-        [HttpPost]
-        public ActionResult Post([FromBody]UserRestrictionsToPost foodRestrictions)
-        {
-
-            // verifica na api facila se tem a face eviada
-            var user = _usersRepository.GetUserById(foodRestrictions.UserId);
-            if (user != null)
-            {
-                _usersRepository.Save();
-                return Ok(user);
-            }
-            return BadRequest();
-        }
+        
 
     }
 }
