@@ -1,4 +1,5 @@
-﻿using GeekBurguer.Users.Contract;
+﻿using AutoMapper;
+using GeekBurguer.Users.Contract;
 using GeekBurguer.Users.Models;
 using GeekBurguer.Users.Repository;
 using GeekBurguer.Users.Services;
@@ -17,11 +18,13 @@ namespace GeekBurguer.Users.Controllers
     {
         private IUsersRepository _usersRepository;
         private IFacialService _facialService;
+        public IMapper _mapper;
 
-        public UsersController(IUsersRepository usersRepository, IFacialService facialService)
+        public UsersController(IUsersRepository usersRepository, IFacialService facialService, IMapper mapper)
         {
             _usersRepository = usersRepository;
             _facialService = facialService;
+            _mapper = mapper;
         }
 
         [HttpGet]
