@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GeekBurguer.Users.Services
 {
-    public interface IFacialService
+    public interface IFacialService : IHostedService
     {
 
         Guid? GetFaceId(byte[] face);
