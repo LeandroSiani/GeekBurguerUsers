@@ -9,6 +9,6 @@ namespace GeekBurguer.Users.Services
     public interface IFacialService
     {
 
-        Guid GetFaceId(byte[] face);
+        Guid? GetFaceId(byte[] face);
     }
 }

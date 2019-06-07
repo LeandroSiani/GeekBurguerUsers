@@ -8,7 +8,7 @@ namespace GeekBurguer.Users.Repository
 {
     public interface IUsersRepository
     {
-        User GetUserById(Guid productId);
+        User GetUserById(Guid? productId);
         bool Add(User product);
         bool UpdateRestricoes(User product);        
         void Save();
