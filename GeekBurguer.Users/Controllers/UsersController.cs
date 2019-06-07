@@ -78,6 +78,8 @@ namespace GeekBurguer.Users.Controllers
                 return Ok(user);
             }
             return NotFound();
+
+            
         }
     }
 
