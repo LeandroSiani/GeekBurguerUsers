@@ -22,40 +22,46 @@ namespace GeekBurguer.Users.Services
 
         public Guid? GetFaceId(byte[] face)
         {
-            byte[] image = System.IO.File.ReadAllBytes("D:\\nicolas.jpg");
+            byte[] image = File.ReadAllBytes("D:\\nicolas.jpg");
 
             FaceListId = Guid.Empty;
 
-            faceServiceClient = new FaceServiceClient(Configuration["FaceAPIKey"], "https://westcentralus.api.cognitive.microsoft.com/face/v1.0/");
-
-            var faceDetected = DetectFaceAsync(image).Result; // face da imagem que foi uploadeada
-
-            if (faceDetected == null)
-            {
-                // retorna msg de que não encontrou uma face
-                return null;
-            }
+            faceServiceClient = new FaceServiceClient(Configuration["FaceAPIKey"], "https://eastus.api.cognitive.microsoft.com/face/v1.0");
 
             while (true)
             {
 
                 var containsAnyFaceOnList = UpsertFaceListAndCheckIfContainsFaceAsync().Result;
-                //Detecta a quantidade de faces na imagem
+                //Detecta a quantidade de faces na imagem                
 
-                Guid? persistedId = null;
-                if (containsAnyFaceOnList)
-                    persistedId = FindSimilarAsync(faceDetected.FaceId, FaceListId).Result;
+                var faceDetected = DetectFaceAsync(image).Result; // face da imagem que foi uploadeada
 
-                //Se nao achou nada semelhante na lista, adiciona a face atual
-                if (persistedId == null)
+                if (faceDetected == null)
                 {
-                    persistedId = AddFaceAsync(FaceListId, face).Result;
-                    //Console.WriteLine($"New User with FaceId {persistedId}");
-                    return persistedId;
+                    // retorna msg de que não encontrou uma face
+                    return null;
+                }
+
+                if (faceDetected != null)
+                {
+                    Guid? persistedId = null;
+                    if (containsAnyFaceOnList)
+                        persistedId = FindSimilarAsync
+                        (faceDetected.FaceId, FaceListId)
+                        .Result;
+                    if (persistedId == null)
+                    {
+                        persistedId = AddFaceAsync
+                        (FaceListId, face)
+                       .Result;
+                        return persistedId;
+                    }
+                    else
+                        return persistedId;
                 }
                 else
                 {
-                    return persistedId;
+                    return null;
                 }
             }
         }
