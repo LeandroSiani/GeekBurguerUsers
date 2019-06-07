@@ -46,6 +46,7 @@ namespace GeekBurguer.Users.Controllers
             {
                 return BadRequest("Esta imagem não contem uma face");
             }
+
             var user = _usersRepository.GetUserById(id);
             if (user == null)
             {

@@ -37,7 +37,7 @@ namespace GeekBurguer.Users.Repository
 
             _dbContext.SaveChanges();
 
-            _productChangedService.SendMessagesAsync();
+            _userRetrievedService.SendMessagesAsync();
         }
 
         public bool UpdateRestricoes(User user)

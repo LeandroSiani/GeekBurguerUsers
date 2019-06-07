@@ -3,9 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Azure.Management.ServiceBus.Fluent;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +12,12 @@ using System.Data.Entity;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using GeekBurguer.Users.Models;
 using GeekBurguer.Users.Services.GeekBurger.Products.Service;
+using Microsoft.Extensions.DependencyInjection;
+using GeekBurguer.Users.Repository;
+using Newtonsoft.Json;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
+using GeekBurguer.Users.Contract;
 
 namespace GeekBurguer.Users.Services
 {
@@ -75,56 +79,56 @@ namespace GeekBurguer.Users.Services
                 else
                 {
                     if (message == null) continue;
-                    //AddOrUpdateEvent(new ProductChangedEvent() { EventId = new Guid(message.MessageId) });
+                    AddOrUpdateEvent(new UserRetrievedEvent() { EventId = new Guid(message.MessageId) });
                     _messages.Remove(message);
                 }
             }
         }
 
-        //private void AddOrUpdateEvent(ProductChangedEvent productChangedEvent)
-        //{
-            //using (var scope = _serviceProvider.CreateScope())
-            //{
-                //var scopedProcessingService =
-                //    scope.ServiceProvider
-                //        .GetRequiredService<IProductChangedEventRepository>();
+        private void AddOrUpdateEvent(UserRetrievedEvent userRetrievedEvent)
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var scopedProcessingService =
+                    scope.ServiceProvider
+                        .GetRequiredService<IUserRetrievedEventRepository>();
 
-                //ProductChangedEvent evt;
-                //if (productChangedEvent.EventId == Guid.Empty
-                //    || (evt = scopedProcessingService.Get(productChangedEvent.EventId)) == null)
-                //    scopedProcessingService.Add(productChangedEvent);
-                //else
-                //{
-                //    evt.MessageSent = true;
-                //    scopedProcessingService.Update(evt);
-                //}
+                UserRetrievedEvent evt;
+                if (userRetrievedEvent.EventId == Guid.Empty
+                    || (evt = scopedProcessingService.Get(userRetrievedEvent.EventId)) == null)
+                    scopedProcessingService.Add(userRetrievedEvent);
+                else
+                {
+                    evt.MessageSent = true;
+                    scopedProcessingService.Update(evt);
+                }
 
-                //scopedProcessingService.Save();
-            //}
-        //}
+                scopedProcessingService.Save();
+            }
+        }
 
         public void AddToMessageList(IEnumerable<EntityEntry<User>> changes)
         {
-            //_messages.AddRange(changes
-            //.Where(entity => entity.State != EntityState.Detached
-            //        && entity.State != EntityState.Unchanged)
-            //.Select(GetMessage).ToList());
+            _messages.AddRange(changes
+            .Where(entity => entity.State != Microsoft.EntityFrameworkCore.EntityState.Detached
+                    && entity.State != Microsoft.EntityFrameworkCore.EntityState.Unchanged)
+            .Select(GetMessage).ToList());
         }
 
         public Message GetMessage(EntityEntry<User> entity)
         {
-            //var productChanged = Mapper.Map<ProductChangedMessage>(entity);
-            //var productChangedSerialized = JsonConvert.SerializeObject(productChanged);
-            //var productChangedByteArray = Encoding.UTF8.GetBytes(productChangedSerialized);
+            var userRetrieved = Mapper.Map<UserretrievedMessage>(entity);
+            var userRetrievedSerialized = JsonConvert.SerializeObject(userRetrieved);
+            var userRetrievedByteArray = Encoding.UTF8.GetBytes(userRetrievedSerialized);
 
-            //var productChangedEvent = Mapper.Map<ProductChangedEvent>(entity);
-            //AddOrUpdateEvent(productChangedEvent);
+            var userRetrievedEvent = Mapper.Map<UserRetrievedEvent>(entity);
+            AddOrUpdateEvent(userRetrievedEvent);
 
             return new Message
             {
-                //Body = productChangedByteArray,
-                //MessageId = productChangedEvent.EventId.ToString(),
-                //Label = productChanged.Product.StoreId.ToString()
+                Body = userRetrievedByteArray,
+                MessageId = userRetrievedEvent.EventId.ToString(),
+                Label = userRetrieved.User.RequesterId.ToString() // TODO ver se é isso aqui
             };
         }
 
