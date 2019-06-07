@@ -39,24 +39,20 @@ namespace GeekBurguer.Users.Controllers
             byte[] image =  face.Face;
 
             // verifica na api facila se tem a face eviada
-            var id = _facialService.GetFaceId(image);
-
+            Guid id;
+            id = _facialService.GetFaceId(image);
+            
             if (id == null)
             {
-                return Ok(new { msg = "Não existe face nessa imagem" });
+                return BadRequest("Esta imagem não contem uma face");
             }
-
-            // com o retorno da api facial busca as restrições do suuario se retornou id
-
-            // se tem restricoes
-            if (true)
-            {
-                return Ok(new UserToGet() { Id = id, Restricoes = new List<string>() });
+            var user = _usersRepository.GetUserById(id);
+            if (user == null) {
+                user = new User(){ Id = id, Face = image, Restricoes = null };
+                _usersRepository.Add(user);
+                return Created("users/" + user.Id,user);
             }
-            else
-            {
-                return Ok();
-            }
+            return Ok(user);            
         }
     }
 
