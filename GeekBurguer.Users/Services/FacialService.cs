@@ -22,9 +22,10 @@ namespace GeekBurguer.Users.Services
 
         public Guid? GetFaceId(byte[] face)
         {
-            byte[] image = File.ReadAllBytes("D:\\nicolas.jpg");
+            // byte[] image = File.ReadAllBytes("D:\\nicolas.jpg");
+            var image = face;
 
-            FaceListId = Guid.Empty;
+             FaceListId = Guid.Empty;
 
             faceServiceClient = new FaceServiceClient(Configuration["FaceAPIKey"], "https://eastus.api.cognitive.microsoft.com/face/v1.0");
 

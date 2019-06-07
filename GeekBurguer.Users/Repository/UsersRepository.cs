@@ -26,7 +26,7 @@ namespace GeekBurguer.Users.Repository
             return true;
         }
 
-        public User GetUserById(Guid userId)
+        public User GetUserById(Guid? userId)
         {
             return _dbContext.Users?.FirstOrDefault(u => u.Id == userId );
         }

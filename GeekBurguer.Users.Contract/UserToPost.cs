@@ -8,5 +8,7 @@ namespace GeekBurguer.Users.Contract
     public class UserToPost
     {
         public Byte[] Face { get; set; }
+
+        public Guid RequesterId { get; set; }
     }
 }

@@ -39,7 +39,7 @@ namespace GeekBurguer.Users.Controllers
             byte[] image =  face.Face;
 
             // verifica na api facila se tem a face eviada
-            Guid id;
+            Guid? id;
             id = _facialService.GetFaceId(image);
             
             if (id == null)
@@ -50,6 +50,7 @@ namespace GeekBurguer.Users.Controllers
             if (user == null) {
                 user = new User(){ Id = id, Face = image, Restricoes = null };
                 _usersRepository.Add(user);
+                _usersRepository.Save();
                 return Created("users/" + user.Id,user);
             }
             return Ok(user);            
