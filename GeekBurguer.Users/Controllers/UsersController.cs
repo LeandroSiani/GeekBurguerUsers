@@ -46,13 +46,18 @@ namespace GeekBurguer.Users.Controllers
             {
                 return BadRequest("Esta imagem não contem uma face");
             }
+
             var user = _usersRepository.GetUserById(id);
-            if (user == null) {
+            if (user == null)
+            {
                 user = new User(){ Id = id, Face = image, Restricoes = null };
+
                 _usersRepository.Add(user);
                 _usersRepository.Save();
                 return Created("users/" + user.Id,user);
             }
+
+            // já retorna o ok pra tela mostrar msg de processando
             return Ok(user);            
         }
     }

@@ -12,7 +12,7 @@ namespace GeekBurguer.Users.Automapper
     {
         public AutomapperProfile()
         {
-            CreateMap<User, UserToGet>();
+            CreateMap<User, UserToPost>();
             //CreateMap<Item, ItemToGet>();
         }
     }
