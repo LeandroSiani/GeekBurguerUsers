@@ -7,30 +7,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Management.ServiceBus.Fluent;
-using Microsoft.Azure.ServiceBus
+using Microsoft.Azure.ServiceBus;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using GeekBurguer.Users.Models;
 
 namespace GeekBurguer.Users.Services
 {
-    public class IUserRetrievedService : IHostedService
+    public interface IUserRetrievedService : IHostedService
     {
-        private const string Topic = "UserRetrieved";
-        private readonly IConfiguration _configuration;
-        private IMapper _mapper;
-        private readonly List<Message> _messages;
-        private Task _lastTask;
-        private readonly IServiceBusNamespace _namespace;
-        //private readonly ILogService _logService;
-        private CancellationTokenSource _cancelMessages;
-        private IServiceProvider _serviceProvider { get; }
-
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
+        void SendMessagesAsync();
+        void AddToMessageList(IEnumerable<EntityEntry<User>> changes);
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GeekBurguer.Users.Models;
+using GeekBurguer.Users.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace GeekBurguer.Users.Repository
@@ -11,10 +12,12 @@ namespace GeekBurguer.Users.Repository
     {
 
         private UsersDbContext _dbContext;
+        public IUserRetrievedService _userRetrievedService;
 
-        public UsersRepository(UsersDbContext dbContext)
+        public UsersRepository(UsersDbContext dbContext, IUserRetrievedService userRetrievedService)
         {
             _dbContext = dbContext;
+            _userRetrievedService = userRetrievedService;
         }
 
         public bool Add(User user)
@@ -30,7 +33,11 @@ namespace GeekBurguer.Users.Repository
 
         public void Save()
         {
+            _userRetrievedService.AddToMessageList(_dbContext.ChangeTracker.Entries<User>());
+
             _dbContext.SaveChanges();
+
+            _productChangedService.SendMessagesAsync();
         }
 
         public bool UpdateRestricoes(User user)
