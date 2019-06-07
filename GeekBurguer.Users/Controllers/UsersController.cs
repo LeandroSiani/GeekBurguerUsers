@@ -30,30 +30,54 @@ namespace GeekBurguer.Users.Controllers
         [HttpGet]
         public ActionResult<User> GetUserById(Guid id)
         {
-            return Ok(new User() { Id = new Guid(), Restricoes = "teste"});
+            return Ok(new User() { Id = new Guid(), Restricoes = "teste" });
         }
 
         [HttpPost]
         public ActionResult Post([FromBody]UserToPost face)
         {
-            byte[] image =  face.Face;
+            byte[] image = face.Face;
 
             // verifica na api facila se tem a face eviada
             Guid? id;
             id = _facialService.GetFaceId(image);
-            
+
             if (id == null)
             {
                 return BadRequest("Esta imagem não contem uma face");
             }
             var user = _usersRepository.GetUserById(id);
-            if (user == null) {
-                user = new User(){ Id = id, Face = image, Restricoes = null };
+            if (user == null)
+            {
+                user = new User() { Id = id, Face = image, Restricoes = null };
                 _usersRepository.Add(user);
                 _usersRepository.Save();
-                return Created("users/" + user.Id,user);
+                return Created("users/" + user.Id, user);
             }
-            return Ok(user);            
+            return Ok(user);
+        }
+
+        [HttpPost("foodRestrictions")]
+        public ActionResult Post([FromBody]UserRestrictionsToPost foodRestrictions)
+        {
+            var user = _usersRepository.GetUserById(foodRestrictions.UserId);
+
+            var restricoes = "";
+            foreach (var item in foodRestrictions.Restricoes)
+            {
+                restricoes += String.Concat(item, ",");
+            }
+            restricoes += ".";
+            restricoes = restricoes.Replace(",.", "");
+
+            user.Others = foodRestrictions.Others;
+            user.Restricoes = restricoes;
+            if (_usersRepository.UpdateRestricoes(user))
+            {
+                _usersRepository.Save();
+                return Ok(user);
+            }
+            return NotFound();
         }
     }
 
