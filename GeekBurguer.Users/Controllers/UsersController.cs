@@ -34,9 +34,9 @@ namespace GeekBurguer.Users.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody]UserToPost face)
+        public ActionResult Post([FromBody]UserToPost userPost)
         {
-            byte[] image = face.Face;
+            byte[] image = userPost.Face;
 
             // verifica na api facila se tem a face eviada
             Guid? id;
@@ -58,7 +58,7 @@ namespace GeekBurguer.Users.Controllers
             return Ok(user);
         }
 
-        [HttpPost("foodRestrictions")]
+        [HttpPost("/foodRestrictions")]
         public ActionResult Post([FromBody]UserRestrictionsToPost foodRestrictions)
         {
             var user = _usersRepository.GetUserById(foodRestrictions.UserId);

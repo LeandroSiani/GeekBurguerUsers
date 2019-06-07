@@ -38,6 +38,8 @@ namespace GeekBurguer.Users
 
             services.AddScoped<IFacialService, FacialService>();
             services.AddScoped<IUsersRepository, UsersRepository>();
+            services.AddScoped<IUserRetrievedService, UserRetrievedService>();
+            
 
             services.AddSwaggerGen(c =>
                 c.SwaggerDoc("v1", new Info { Title = "Users", Version = "v1" })
