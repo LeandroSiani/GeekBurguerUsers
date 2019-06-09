@@ -10,6 +10,8 @@ using Microsoft.Azure.Management.ServiceBus.Fluent;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using GeekBurguer.Users.Models;
+using GeekBurguer.Users.Repository;
+using GeekBurguer.Users.Contract;
 
 namespace GeekBurguer.Users.Services
 {
@@ -17,5 +19,6 @@ namespace GeekBurguer.Users.Services
     {
         void SendMessagesAsync();
         void AddToMessageList(IEnumerable<EntityEntry<User>> changes);
+        Task AddUser(UserToPost userToPost, IFacialService _facialService, IUsersRepository usersRepository);
     }
 }

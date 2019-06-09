@@ -31,7 +31,6 @@ namespace GeekBurguer.Users.Services
 
             while (true)
             {
-
                 var containsAnyFaceOnList = UpsertFaceListAndCheckIfContainsFaceAsync().Result;
                 //Detecta a quantidade de faces na imagem                
 
@@ -66,8 +65,7 @@ namespace GeekBurguer.Users.Services
                 }
             }
         }
-
-
+        
         private static async Task<bool> UpsertFaceListAndCheckIfContainsFaceAsync()
         {
             var faceListId = FaceListId.ToString();

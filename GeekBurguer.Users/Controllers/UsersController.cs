@@ -19,12 +19,14 @@ namespace GeekBurguer.Users.Controllers
         private IUsersRepository _usersRepository;
         private IFacialService _facialService;
         public IMapper _mapper;
+        private IUserRetrievedService _userRetrievedService;
 
-        public UsersController(IUsersRepository usersRepository, IFacialService facialService, IMapper mapper)
+        public UsersController(IUsersRepository usersRepository, IFacialService facialService, IMapper mapper, IUserRetrievedService userRetrievedService)
         {
             _usersRepository = usersRepository;
             _facialService = facialService;
             _mapper = mapper;
+            _userRetrievedService = userRetrievedService;
         }
 
         [HttpGet]
@@ -36,26 +38,8 @@ namespace GeekBurguer.Users.Controllers
         [HttpPost]
         public ActionResult Post([FromBody]UserToPost userPost)
         {
-            byte[] image = userPost.Face;
-
-            // verifica na api facila se tem a face eviada
-            Guid? id;
-            id = _facialService.GetFaceId(image);
-
-            if (id == null)
-            {
-                return BadRequest("Esta imagem não contem uma face");
-            }
-
-            var user = _usersRepository.GetUserById(id);
-            if (user == null)
-            {
-                user = new User() { Id = id, Face = image, Restricoes = null };
-                _usersRepository.Add(user);
-                _usersRepository.Save();
-                return Created("users/" + user.Id, user);
-            }
-            return Ok(user);
+            _userRetrievedService.AddUser(userPost, _facialService, _usersRepository);
+            return Ok("Processando");
         }
 
         [HttpPost("/foodRestrictions")]
@@ -80,7 +64,7 @@ namespace GeekBurguer.Users.Controllers
             }
             return NotFound();
 
-            
+
         }
     }
 

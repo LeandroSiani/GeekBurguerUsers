@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GeekBurguer.Users.Contract;
 using GeekBurguer.Users.Models;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace GeekBurguer.Users.Automapper
         public AutomapperProfile()
         {
             CreateMap<User, UserToPost>();
+            CreateMap<EntityEntry<User>, UserRetrievedMessage>().ForMember(dest => dest.User, opt => opt.MapFrom(src => src.Entity));
             //CreateMap<Item, ItemToGet>();
         }
     }

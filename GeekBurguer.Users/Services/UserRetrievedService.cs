@@ -11,7 +11,6 @@ using AutoMapper;
 using System.Data.Entity;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using GeekBurguer.Users.Models;
-using GeekBurguer.Users.Services.GeekBurger.Products.Service;
 using Microsoft.Extensions.DependencyInjection;
 using GeekBurguer.Users.Repository;
 using Newtonsoft.Json;
@@ -29,9 +28,21 @@ namespace GeekBurguer.Users.Services
         private readonly List<Message> _messages;
         private Task _lastTask;
         private readonly IServiceBusNamespace _namespace;
-        //private readonly ILogService _logService;
+        private readonly ILogService _logService;
         private CancellationTokenSource _cancelMessages;
         private IServiceProvider _serviceProvider { get; }
+
+        public UserRetrievedService(IMapper mapper,
+    IConfiguration configuration, ILogService logService, IServiceProvider serviceProvider)
+        {
+            _mapper = mapper;
+            _configuration = configuration;
+            _logService = logService;
+            _messages = new List<Message>();
+            _namespace = _configuration.GetServiceBusNamespace();
+            _cancelMessages = new CancellationTokenSource();
+            _serviceProvider = serviceProvider;
+        }
 
         public async void SendMessagesAsync()
         {
@@ -41,7 +52,7 @@ namespace GeekBurguer.Users.Services
             var config = _configuration.GetSection("serviceBus").Get<ServiceBusConfiguration>();
             var topicClient = new TopicClient(config.ConnectionString, Topic);
 
-            //_logService.SendMessagesAsync("Product was changed");
+            _logService.SendMessagesAsync("User was created/update");
 
             _lastTask = SendAsync(topicClient, _cancelMessages.Token);
 
@@ -117,19 +128,25 @@ namespace GeekBurguer.Users.Services
 
         public Message GetMessage(EntityEntry<User> entity)
         {
-            var userRetrieved = Mapper.Map<UserretrievedMessage>(entity);
-            var userRetrievedSerialized = JsonConvert.SerializeObject(userRetrieved);
-            var userRetrievedByteArray = Encoding.UTF8.GetBytes(userRetrievedSerialized);
-
-            var userRetrievedEvent = Mapper.Map<UserRetrievedEvent>(entity);
-            AddOrUpdateEvent(userRetrievedEvent);
-
-            return new Message
+            try
             {
-                Body = userRetrievedByteArray,
-                MessageId = userRetrievedEvent.EventId.ToString(),
-                Label = userRetrieved.User.RequesterId.ToString() // TODO ver se é isso aqui
-            };
+                var userRetrieved = Mapper.Map<UserRetrievedMessage>(entity);
+                var userRetrievedSerialized = JsonConvert.SerializeObject(userRetrieved);
+                var userRetrievedByteArray = Encoding.UTF8.GetBytes(userRetrievedSerialized);
+
+                var userRetrievedEvent = Mapper.Map<UserRetrievedEvent>(entity);
+                AddOrUpdateEvent(userRetrievedEvent);
+
+                return new Message
+                {
+                    Body = userRetrievedByteArray,
+                    MessageId = userRetrievedEvent.EventId.ToString(),
+                    Label = userRetrieved.User.RequesterId.ToString() // TODO ver se é isso aqui
+                };
+            }catch(Exception ex)
+            {
+                return new Message { };
+            }
         }
 
         public bool HandleException(Task task)
@@ -161,15 +178,34 @@ namespace GeekBurguer.Users.Services
                     .Equals(Topic, StringComparison.InvariantCultureIgnoreCase)))
                 _namespace.Topics.Define(Topic)
                     .WithSizeInMB(1024).Create();
-
         }
-
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _cancelMessages.Cancel();
 
             return Task.CompletedTask;
+        }
+
+        public async Task AddUser(UserToPost userToPost, IFacialService _facialService, IUsersRepository _usersRepository)
+        {
+            // verifica na api facila se tem a face eviada
+            Guid? id = _facialService.GetFaceId(userToPost.Face);
+
+            if (id == null)
+            {
+                //"Esta imagem não contem uma face"
+                _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face");
+            }
+
+            var user = _usersRepository.GetUserById(id);
+            if (user == null)
+            {
+                user = new User() { Id = id, Face = userToPost.Face, Restricoes = null };
+                _usersRepository.Add(user);
+                _usersRepository.Save();
+                //return Created("users/" + user.Id, user);
+            }
         }
     }
 }
