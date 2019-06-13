@@ -63,7 +63,7 @@ namespace GeekBurguer.Users
             app.UseSwaggerUI(c =>
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Users")
             );
-
+            
             using (var serviceScope = app
                 .ApplicationServices
                 .GetService<IServiceScopeFactory>()

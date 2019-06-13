@@ -10,12 +10,12 @@ namespace GeekBurguer.Users.Repository
     public class UsersRepository : IUsersRepository
     {
         private UsersDbContext _dbContext;
-        public IUserRetrievedService _userRetrievedService;
+       // public IUserRetrievedService _userRetrievedService;
 
-        public UsersRepository(UsersDbContext dbContext, IUserRetrievedService userRetrievedService)
+        public UsersRepository(UsersDbContext dbContext)//, IUserRetrievedService userRetrievedService)
         {
             _dbContext = dbContext;
-            _userRetrievedService = userRetrievedService;
+         //   _userRetrievedService = userRetrievedService;
         }
 
         public bool Add(User user)
@@ -31,8 +31,8 @@ namespace GeekBurguer.Users.Repository
 
         public void Save()
         {
-            _userRetrievedService.SendMessagesAsync();
-            _userRetrievedService.AddToMessageList(_dbContext.ChangeTracker.Entries<User>());
+            //_userRetrievedService.SendMessagesAsync();
+            //_userRetrievedService.AddToMessageList(_dbContext.ChangeTracker.Entries<User>());
 
             _dbContext.SaveChanges();            
         }

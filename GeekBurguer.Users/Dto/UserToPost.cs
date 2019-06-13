@@ -11,6 +11,6 @@ namespace GeekBurguer.Users.Dto
     public class UserToPost
     {
         [JsonConverter(typeof(Base64FileJsonConverter))]
-        public Byte[] Face { get; set; }
+        public string Face { get; set; }
     }
 }

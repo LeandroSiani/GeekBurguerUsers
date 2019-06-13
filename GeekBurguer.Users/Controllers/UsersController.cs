@@ -20,13 +20,16 @@ namespace GeekBurguer.Users.Controllers
         private IFacialService _facialService;
         public IMapper _mapper;
         private IUserRetrievedService _userRetrievedService;
+        private ILogService _logService;
 
-        public UsersController(IUsersRepository usersRepository, IFacialService facialService, IMapper mapper, IUserRetrievedService userRetrievedService)
+        public UsersController(IUsersRepository usersRepository, IFacialService facialService, IMapper mapper,
+            IUserRetrievedService userRetrievedService, ILogService logService)
         {
             _usersRepository = usersRepository;
             _facialService = facialService;
             _mapper = mapper;
             _userRetrievedService = userRetrievedService;
+            _logService = logService;
         }
 
         [HttpGet]
@@ -38,7 +41,7 @@ namespace GeekBurguer.Users.Controllers
         [HttpPost]
         public ActionResult Post([FromBody]UserToPost userPost)
         {
-            _userRetrievedService.AddUser(userPost, _facialService, _usersRepository);
+            AddUserAsync(userPost);
             return Ok("Processando");
         }
 
@@ -65,6 +68,28 @@ namespace GeekBurguer.Users.Controllers
             return NotFound();
 
 
+        }     
+
+        private async void AddUserAsync(UserToPost userPost)
+        {
+            var face = Encoding.ASCII.GetBytes(userPost.Face);
+            Guid? id = _facialService.GetFaceId(face);
+            if (id == null)
+            {
+                //"Esta imagem não contem uma face"
+                _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face");
+            }
+
+            var user = _usersRepository.GetUserById(id);
+            if (user == null)
+            {
+
+                user = new User() { Id = id, Face = face, Restricoes = null };
+                _usersRepository.Add(user);
+                _usersRepository.Save();
+                _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} User was created/update");
+                //return Created("users/" + user.Id, user);
+            }
         }
     }
 

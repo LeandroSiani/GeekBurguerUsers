@@ -31,6 +31,8 @@ namespace GeekBurguer.Users.Services
         private readonly ILogService _logService;
         private CancellationTokenSource _cancelMessages;
         private IServiceProvider _serviceProvider { get; }
+        
+        
 
         public UserRetrievedService(IMapper mapper,
     IConfiguration configuration, ILogService logService, IServiceProvider serviceProvider)
@@ -41,7 +43,7 @@ namespace GeekBurguer.Users.Services
             _messages = new List<Message>();
             _namespace = _configuration.GetServiceBusNamespace();
             _cancelMessages = new CancellationTokenSource();
-            _serviceProvider = serviceProvider;
+            _serviceProvider = serviceProvider;            
         }
 
         public async void SendMessagesAsync()
@@ -50,9 +52,7 @@ namespace GeekBurguer.Users.Services
                 return;
 
             var config = _configuration.GetSection("serviceBus").Get<ServiceBusConfiguration>();
-            var topicClient = new TopicClient(config.ConnectionString, Topic);
-
-            _logService.SendMessagesAsync("User was created/update");
+            var topicClient = new TopicClient(config.ConnectionString, Topic);            
 
             _lastTask = SendAsync(topicClient, _cancelMessages.Token);
 
@@ -187,25 +187,5 @@ namespace GeekBurguer.Users.Services
             return Task.CompletedTask;
         }
 
-        public async Task AddUser(UserToPost userToPost, IFacialService _facialService, IUsersRepository _usersRepository)
-        {
-            // verifica na api facila se tem a face eviada
-            Guid? id = _facialService.GetFaceId(userToPost.Face);
-
-            if (id == null)
-            {
-                //"Esta imagem não contem uma face"
-                _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face");
-            }
-
-            var user = _usersRepository.GetUserById(id);
-            if (user == null)
-            {
-                user = new User() { Id = id, Face = userToPost.Face, Restricoes = null };
-                _usersRepository.Add(user);
-                _usersRepository.Save();
-                //return Created("users/" + user.Id, user);
-            }
-        }
     }
 }
