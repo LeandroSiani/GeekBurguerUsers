@@ -6,7 +6,7 @@ namespace GeekBurguer.Users.Contract
 {
     public class UserRetrievedMessage
     {
-        public UserState State { get; set; }
-        public UserResponse User { get; set; }
+        public Guid? UserId { get; set; }
+        public bool AreRestrictionsSet { get; set; }
     }
 }

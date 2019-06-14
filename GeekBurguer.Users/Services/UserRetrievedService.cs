@@ -133,15 +133,15 @@ namespace GeekBurguer.Users.Services
             try
             {
                 //var userRetrieved = _mapper.Map<UserRetrievedMessage>(entity);
-                var userRetrieved = new UserRetrievedMessage();
-                userRetrieved.User = new UserResponse();
-                userRetrieved.User.UserId = entity.Entity.Id;
-                userRetrieved.User.AreRestrictionsSet = false;
+                var userRetrieved = new UserRetrievedMessage();                
+                userRetrieved.UserId = entity.Entity.Id;
+                userRetrieved.AreRestrictionsSet = false;
 
                 var userRetrievedSerialized = JsonConvert.SerializeObject(userRetrieved);
                 var userRetrievedByteArray = Encoding.UTF8.GetBytes(userRetrievedSerialized);
 
-                var userRetrievedEvent = _mapper.Map<UserRetrievedEvent>(entity);
+                //var userRetrievedEvent = _mapper.Map<UserRetrievedEvent>(entity);
+                var userRetrievedEvent = new UserRetrievedEvent();
                 userRetrievedEvent.EventId = Guid.NewGuid();
                 //AddOrUpdateEvent(userRetrievedEvent);
 
@@ -156,7 +156,7 @@ namespace GeekBurguer.Users.Services
                 {
                     Body = userRetrievedByteArray,
                     MessageId = userRetrievedEvent.EventId.ToString(),
-                    Label = userRetrieved.User.UserId.ToString() // TODO ver se é isso aqui
+                    Label = userRetrieved.UserId.ToString() // TODO ver se é isso aqui
                 };
             }
             catch (Exception ex)
