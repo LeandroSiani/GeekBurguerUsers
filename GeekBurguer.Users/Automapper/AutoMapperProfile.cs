@@ -14,10 +14,10 @@ namespace GeekBurguer.Users.Automapper
         public AutomapperProfile()
         {
             CreateMap<User, UserToPost>();
-            CreateMap<EntityEntry<User>, UserRetrievedMessage>().ForMember(
-                dest => dest.User, opt => opt.MapFrom(src => src.Entity));
-            CreateMap<EntityEntry<User>, UserRetrievedEvent>().ForMember(
-                dest => dest.User, opt => opt.MapFrom(src => src.Entity));
+            //CreateMap<EntityEntry<User>, UserRetrievedMessage>().ForMember(
+            //    dest => dest, opt => opt.MapFrom(src => src.Entity));
+            //CreateMap<EntityEntry<User>, UserRetrievedEvent>().ForMember(
+            //    dest => dest.User, opt => opt.MapFrom(src => src.Entity));
             //CreateMap<Item, ItemToGet>();
         }
     }
