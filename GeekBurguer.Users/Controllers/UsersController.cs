@@ -77,7 +77,7 @@ namespace GeekBurguer.Users.Controllers
             if (id == null)
             {
                 //"Esta imagem não contem uma face"
-                _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face");
+               // _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face");
             }
 
             var user = _usersRepository.GetUserById(id);
@@ -87,7 +87,7 @@ namespace GeekBurguer.Users.Controllers
                 user = new User() { Id = id, Face = face, Restricoes = null };
                 _usersRepository.Add(user);
                 _usersRepository.Save();
-                _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} User was created/update");
+                //_logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} User was created/update");
                 //return Created("users/" + user.Id, user);
             }
         }

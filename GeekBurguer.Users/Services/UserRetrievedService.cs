@@ -27,19 +27,18 @@ namespace GeekBurguer.Users.Services
         private IMapper _mapper;
         private readonly List<Message> _messages;
         private Task _lastTask;
-        private readonly IServiceBusNamespace _namespace;
-        private readonly ILogService _logService;
+        private readonly IServiceBusNamespace _namespace;        
         private CancellationTokenSource _cancelMessages;
         private IServiceProvider _serviceProvider { get; }
         
         
 
         public UserRetrievedService(IMapper mapper,
-    IConfiguration configuration, ILogService logService, IServiceProvider serviceProvider)
+    IConfiguration configuration, IServiceProvider serviceProvider)
         {
             _mapper = mapper;
             _configuration = configuration;
-            _logService = logService;
+            
             _messages = new List<Message>();
             _namespace = _configuration.GetServiceBusNamespace();
             _cancelMessages = new CancellationTokenSource();
@@ -120,21 +119,24 @@ namespace GeekBurguer.Users.Services
 
         public void AddToMessageList(IEnumerable<EntityEntry<User>> changes)
         {
-            _messages.AddRange(changes
+            var content = changes
             .Where(entity => entity.State != Microsoft.EntityFrameworkCore.EntityState.Detached
-                    && entity.State != Microsoft.EntityFrameworkCore.EntityState.Unchanged)
-            .Select(GetMessage).ToList());
+                    && entity.State != Microsoft.EntityFrameworkCore.EntityState.Unchanged);
+
+            var selected = content.Select(GetMessage).ToList();
+
+            _messages.AddRange(selected);
         }
 
         public Message GetMessage(EntityEntry<User> entity)
         {
             try
             {
-                var userRetrieved = Mapper.Map<UserRetrievedMessage>(entity);
+                var userRetrieved = _mapper.Map<UserRetrievedMessage>(entity);
                 var userRetrievedSerialized = JsonConvert.SerializeObject(userRetrieved);
                 var userRetrievedByteArray = Encoding.UTF8.GetBytes(userRetrievedSerialized);
 
-                var userRetrievedEvent = Mapper.Map<UserRetrievedEvent>(entity);
+                var userRetrievedEvent = _mapper.Map<UserRetrievedEvent>(entity);
                 AddOrUpdateEvent(userRetrievedEvent);
 
                 return new Message

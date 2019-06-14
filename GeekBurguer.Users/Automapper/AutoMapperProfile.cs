@@ -15,6 +15,7 @@ namespace GeekBurguer.Users.Automapper
         {
             CreateMap<User, UserToPost>();
             CreateMap<EntityEntry<User>, UserRetrievedMessage>().ForMember(dest => dest.User, opt => opt.MapFrom(src => src.Entity));
+            CreateMap<EntityEntry<User>, UserRetrievedEvent>().ForMember(dest => dest.User, opt => opt.MapFrom(src => src.Entity));
             //CreateMap<Item, ItemToGet>();
         }
     }
