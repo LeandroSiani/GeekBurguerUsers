@@ -7,7 +7,7 @@ namespace GeekBurguer.Users.Contract
 {
     public class UserToPost
     {
-        public string Face { get; set; }
+        public byte[] Face { get; set; }
 
         public Guid RequesterId { get; set; }
     }

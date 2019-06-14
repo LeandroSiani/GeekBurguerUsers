@@ -72,7 +72,7 @@ namespace GeekBurguer.Users.Controllers
 
         private async void AddUserAsync(UserToPost userPost)
         {
-            var face = Encoding.ASCII.GetBytes(userPost.Face);
+            var face = userPost.Face;
             Guid? id = _facialService.GetFaceId(face);
 
             if (id != null)
