@@ -86,6 +86,10 @@ namespace GeekBurguer.Users.Controllers
                     _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - usuário '{user.Id}' criado com sucesso!");
                     //return Created("users/" + user.Id, user);
                 }
+                else
+                {
+                    _usersRepository.SendMessage();
+                }
             }
             else
             {

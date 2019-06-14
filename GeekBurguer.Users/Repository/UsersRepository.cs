@@ -31,10 +31,15 @@ namespace GeekBurguer.Users.Repository
 
         public void Save()
         {
-            _userRetrievedService.AddToMessageList(_dbContext.ChangeTracker.Entries<User>());
-            _userRetrievedService.SendMessagesAsync();            
+            SendMessage();
 
-            _dbContext.SaveChanges();            
+            _dbContext.SaveChanges();
+        }
+
+        public void SendMessage()
+        {
+            _userRetrievedService.AddToMessageList(_dbContext.ChangeTracker.Entries<User>());
+            _userRetrievedService.SendMessagesAsync();
         }
 
         public bool UpdateRestricoes(User user)

@@ -12,5 +12,7 @@ namespace GeekBurguer.Users.Repository
         bool Add(User product);
         bool UpdateRestricoes(User product);        
         void Save();
+
+        void SendMessage();
     }
 }
