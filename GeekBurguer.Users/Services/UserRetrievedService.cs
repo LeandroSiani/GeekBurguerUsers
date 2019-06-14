@@ -137,7 +137,15 @@ namespace GeekBurguer.Users.Services
                 var userRetrievedByteArray = Encoding.UTF8.GetBytes(userRetrievedSerialized);
 
                 var userRetrievedEvent = _mapper.Map<UserRetrievedEvent>(entity);
-                AddOrUpdateEvent(userRetrievedEvent);
+                userRetrievedEvent.EventId = Guid.NewGuid();
+                //AddOrUpdateEvent(userRetrievedEvent);
+
+                /*return new Message
+                {
+                    Body = userRetrievedByteArray,
+                    MessageId = userRetrievedEvent.EventId.ToString(),
+                    Label = userRetrieved.User.RequesterId.ToString() // TODO ver se é isso aqui
+                };*/
 
                 return new Message
                 {
@@ -145,7 +153,8 @@ namespace GeekBurguer.Users.Services
                     MessageId = userRetrievedEvent.EventId.ToString(),
                     Label = userRetrieved.User.RequesterId.ToString() // TODO ver se é isso aqui
                 };
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return new Message { };
             }
