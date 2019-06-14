@@ -76,9 +76,10 @@ namespace GeekBurguer.Users.Controllers
             Guid? id = _facialService.GetFaceId(face);
             if (id == null)
             {
-                //"Esta imagem não contem uma face"
+               //"Esta imagem não contem uma face"
                // _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face");
-            }
+            } 
+
 
             var user = _usersRepository.GetUserById(id);
             if (user == null)

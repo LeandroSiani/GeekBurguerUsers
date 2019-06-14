@@ -132,8 +132,12 @@ namespace GeekBurguer.Users.Services
         {
             try
             {
-                var userRetrieved = _mapper.Map<UserRetrievedMessage>(entity);
-                
+                //var userRetrieved = _mapper.Map<UserRetrievedMessage>(entity);
+                var userRetrieved = new UserRetrievedMessage();
+                userRetrieved.User = new UserResponse();
+                userRetrieved.User.UserId = entity.Entity.Id;
+                userRetrieved.User.AreRestrictionsSet = false;
+
                 var userRetrievedSerialized = JsonConvert.SerializeObject(userRetrieved);
                 var userRetrievedByteArray = Encoding.UTF8.GetBytes(userRetrievedSerialized);
 

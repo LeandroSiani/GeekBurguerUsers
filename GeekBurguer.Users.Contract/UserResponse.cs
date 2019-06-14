@@ -6,7 +6,7 @@ namespace GeekBurguer.Users.Contract
 {
     public class UserResponse
     {
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
         public bool AreRestrictionsSet { get; set; }
     }
 }
