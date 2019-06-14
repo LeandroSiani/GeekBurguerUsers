@@ -68,27 +68,29 @@ namespace GeekBurguer.Users.Controllers
             return NotFound();
 
 
-        }     
+        }
 
         private async void AddUserAsync(UserToPost userPost)
         {
             var face = Encoding.ASCII.GetBytes(userPost.Face);
             Guid? id = _facialService.GetFaceId(face);
-            if (id == null)
+
+            if (id != null)
+            {
+                var user = _usersRepository.GetUserById(id);
+                if (user == null)
+                {
+                    user = new User() { Id = id, Face = face, Restricoes = null };
+                    _usersRepository.Add(user);
+                    _usersRepository.Save();
+                    _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - usuário '{user.Id}' criado com sucesso!");
+                    //return Created("users/" + user.Id, user);
+                }
+            }
+            else
             {
                 //"Esta imagem não contem uma face"
-               // _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face");
-            }
-
-            var user = _usersRepository.GetUserById(id);
-            if (user == null)
-            {
-
-                user = new User() { Id = id, Face = face, Restricoes = null };
-                _usersRepository.Add(user);
-                _usersRepository.Save();
-                //_logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} User was created/update");
-                //return Created("users/" + user.Id, user);
+                _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face");
             }
         }
     }
