@@ -13,6 +13,6 @@ namespace GeekBurguer.Users.Repository
         bool UpdateRestricoes(User product);        
         void Save();
 
-        void SendMessage();
+        void SendMessage(bool exists);
     }
 }

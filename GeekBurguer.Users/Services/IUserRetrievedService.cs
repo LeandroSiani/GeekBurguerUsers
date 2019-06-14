@@ -18,6 +18,7 @@ namespace GeekBurguer.Users.Services
     public interface IUserRetrievedService : IHostedService
     {
         void SendMessagesAsync();
-        void AddToMessageList(IEnumerable<EntityEntry<User>> changes);        
+        void AddToMessageList(IEnumerable<EntityEntry<User>> changes);
+        void AddToMessageListExits(IEnumerable<EntityEntry<User>> changes)
     }
 }

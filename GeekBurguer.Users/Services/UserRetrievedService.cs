@@ -128,6 +128,15 @@ namespace GeekBurguer.Users.Services
             _messages.AddRange(selected);
         }
 
+        public void AddToMessageListExits(IEnumerable<EntityEntry<User>> changes)
+        {
+            var content = changes;
+
+            var selected = content.Select(GetMessage).ToList();
+
+            _messages.AddRange(selected);
+        }
+
         public Message GetMessage(EntityEntry<User> entity)
         {
             try

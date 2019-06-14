@@ -88,7 +88,7 @@ namespace GeekBurguer.Users.Controllers
                 }
                 else
                 {
-                    _usersRepository.SendMessage();
+                    _usersRepository.SendMessage(true);
                 }
             }
             else
