@@ -88,8 +88,8 @@ namespace GeekBurguer.Users.Services
                 }
                 else
                 {
-                    if (message == null) continue;
-                    AddOrUpdateEvent(new UserRetrievedEvent() { EventId = new Guid(message.MessageId) });
+                    //if (message == null) continue;
+                    //AddOrUpdateEvent(new UserRetrievedEvent() { EventId = new Guid(message.MessageId) });
                     _messages.Remove(message);
                 }
             }
@@ -133,6 +133,7 @@ namespace GeekBurguer.Users.Services
             try
             {
                 var userRetrieved = _mapper.Map<UserRetrievedMessage>(entity);
+                
                 var userRetrievedSerialized = JsonConvert.SerializeObject(userRetrieved);
                 var userRetrievedByteArray = Encoding.UTF8.GetBytes(userRetrievedSerialized);
 
@@ -151,7 +152,7 @@ namespace GeekBurguer.Users.Services
                 {
                     Body = userRetrievedByteArray,
                     MessageId = userRetrievedEvent.EventId.ToString(),
-                    Label = userRetrieved.User.RequesterId.ToString() // TODO ver se é isso aqui
+                    Label = userRetrieved.User.UserId.ToString() // TODO ver se é isso aqui
                 };
             }
             catch (Exception ex)
