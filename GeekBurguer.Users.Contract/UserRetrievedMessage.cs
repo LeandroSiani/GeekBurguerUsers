@@ -7,6 +7,6 @@ namespace GeekBurguer.Users.Contract
     public class UserRetrievedMessage
     {
         public UserState State { get; set; }
-        public UserToPost User { get; set; }
+        public UserResponse User { get; set; }
     }
 }
