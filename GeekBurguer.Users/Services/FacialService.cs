@@ -25,7 +25,7 @@ namespace GeekBurguer.Users.Services
             // byte[] image = File.ReadAllBytes("D:\\nicolas.jpg");
             var image = face;
 
-             FaceListId = Guid.Empty;
+            FaceListId = new Guid(Configuration["FaceListId"]);
 
             faceServiceClient = new FaceServiceClient(Configuration["FaceAPIKey"], "https://eastus.api.cognitive.microsoft.com/face/v1.0");
 
