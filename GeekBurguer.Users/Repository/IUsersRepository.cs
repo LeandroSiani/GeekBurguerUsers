@@ -10,9 +10,9 @@ namespace GeekBurguer.Users.Repository
     {
         User GetUserById(Guid? productId);
         bool Add(User product);
-        bool UpdateRestricoes(User product);        
-        void Save();
-
+        bool UpdateRestricoes(User product);
+        void Save();        
         void SendMessage(bool exists);
+        
     }
 }

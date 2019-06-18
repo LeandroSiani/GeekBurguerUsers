@@ -26,7 +26,7 @@ namespace GeekBurguer.Users.Repository
 
         public User GetUserById(Guid? userId)
         {
-            return _dbContext.Users?.FirstOrDefault(u => u.Id == userId );
+            return _dbContext.Users?.FirstOrDefault(u => u.Id == userId);
         }
 
         public void Save()
@@ -56,7 +56,7 @@ namespace GeekBurguer.Users.Repository
                 _dbContext.Entry(userDb).State = EntityState.Modified;
                 return true;
             }
-            
+
             return false;
         }
     }

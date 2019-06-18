@@ -19,6 +19,6 @@ namespace GeekBurguer.Users.Services
     {
         void SendMessagesAsync();
         void AddToMessageList(IEnumerable<EntityEntry<User>> changes);
-        void AddToMessageListExits(IEnumerable<EntityEntry<User>> changes)
+        void AddToMessageListExits(IEnumerable<EntityEntry<User>> changes);
     }
 }

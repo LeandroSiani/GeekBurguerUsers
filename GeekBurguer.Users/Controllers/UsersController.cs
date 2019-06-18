@@ -41,17 +41,24 @@ namespace GeekBurguer.Users.Controllers
         [HttpPost]
         public ActionResult Post([FromBody]UserToPost userPost)
         {
-            AddUserAsync(userPost);
+            AddUser(userPost);
             return Ok("Processando");
         }
 
-        [HttpPost("/foodRestrictions")]
+        [HttpPost("foodRestrictions")]
         public ActionResult Post([FromBody]UserRestrictionsToPost foodRestrictions)
+        {
+            GravarRestricoes(foodRestrictions);
+            return Ok("Processando");
+
+        }
+
+        private async void GravarRestricoes(UserRestrictionsToPost foodRestrictions)
         {
             var user = _usersRepository.GetUserById(foodRestrictions.UserId);
 
             var restricoes = "";
-            foreach (var item in foodRestrictions.Restricoes)
+            foreach (var item in foodRestrictions.Restrictions)
             {
                 restricoes += String.Concat(item, ",");
             }
@@ -63,14 +70,15 @@ namespace GeekBurguer.Users.Controllers
             if (_usersRepository.UpdateRestricoes(user))
             {
                 _usersRepository.Save();
-                return Ok(user);
+                _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} RESTRIÇÕES - usuário '{user.Id}' gerado restrições com sucesso!");
             }
-            return NotFound();
-
-
+            else
+            {
+                _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} RESTRIÇÕES - usuário '{user.Id}' não localizado");
+            }
         }
 
-        private async void AddUserAsync(UserToPost userPost)
+        private async void AddUser(UserToPost userPost)
         {
             var face = userPost.Face;
             Guid? id = _facialService.GetFaceId(face);

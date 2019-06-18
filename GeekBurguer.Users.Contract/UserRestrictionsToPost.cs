@@ -7,7 +7,7 @@ namespace GeekBurguer.Users.Contract
     public class UserRestrictionsToPost
     {
         public Guid UserId { get; set; }
-        public List<String> Restricoes { get; set; }
+        public List<String> Restrictions { get; set; }
         public Guid RequesterId { get; set; }
         public string Others { get; set; }
     }

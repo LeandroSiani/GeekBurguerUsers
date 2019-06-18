@@ -142,9 +142,9 @@ namespace GeekBurguer.Users.Services
             try
             {
                 //var userRetrieved = _mapper.Map<UserRetrievedMessage>(entity);
-                var userRetrieved = new UserRetrievedMessage();                
+                var userRetrieved = new UserRetrievedMessage();
                 userRetrieved.UserId = entity.Entity.Id;
-                userRetrieved.AreRestrictionsSet = false;
+                userRetrieved.AreRestrictionsSet = entity.Entity.Restricoes!=null;
 
                 var userRetrievedSerialized = JsonConvert.SerializeObject(userRetrieved);
                 var userRetrievedByteArray = Encoding.UTF8.GetBytes(userRetrievedSerialized);

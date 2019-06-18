@@ -18,4 +18,17 @@ namespace GeekBurguer.Users.Models
 
         public bool MessageSent { get; set; }
     }
+
+    public class UserRestrictionsRetrievedEvent
+    {
+        [Key]
+        public Guid EventId { get; set; }
+
+        //public UserState State { get; set; }
+
+        //[ForeignKey("ProductId")]
+        public User User { get; set; }
+
+        public bool MessageSent { get; set; }
+    }
 }

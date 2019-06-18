@@ -9,4 +9,5 @@ namespace GeekBurguer.Users.Contract
         public Guid? UserId { get; set; }
         public bool AreRestrictionsSet { get; set; }
     }
+    
 }
