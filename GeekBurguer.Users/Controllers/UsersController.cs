@@ -1,12 +1,16 @@
 ﻿using AutoMapper;
 using GeekBurguer.Users.Contract;
 using GeekBurguer.Users.Models;
+using GeekBurguer.Users.Polly;
 using GeekBurguer.Users.Repository;
 using GeekBurguer.Users.Services;
 using Microsoft.AspNetCore.Mvc;
+using Polly;
+using Polly.Registry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,15 +25,17 @@ namespace GeekBurguer.Users.Controllers
         public IMapper _mapper;
         private IUserRetrievedService _userRetrievedService;
         private ILogService _logService;
+        private readonly IReadOnlyPolicyRegistry<string> _policyRegistry;
 
         public UsersController(IUsersRepository usersRepository, IFacialService facialService, IMapper mapper,
-            IUserRetrievedService userRetrievedService, ILogService logService)
+            IUserRetrievedService userRetrievedService, ILogService logService, IReadOnlyPolicyRegistry<string> policyRegistry)
         {
             _usersRepository = usersRepository;
             _facialService = facialService;
             _mapper = mapper;
             _userRetrievedService = userRetrievedService;
             _logService = logService;
+            _policyRegistry = policyRegistry;
         }
 
         [HttpGet]
@@ -81,7 +87,16 @@ namespace GeekBurguer.Users.Controllers
         private async void AddUser(UserToPost userPost)
         {
             var face = userPost.Face;
-            Guid? id = _facialService.GetFaceId(face);
+
+            //var retryPolicy = _policyRegistry.Get<IAsyncPolicy<HttpResponseMessage>>(PolicyNames.BasicRetry)
+            //                  ?? Policy.NoOpAsync<HttpResponseMessage>();
+
+            //var retries = 0;
+            //// ReSharper disable once AccessToDisposedClosure
+            //await retryPolicy.ExecuteAsync((ctx) =>
+            //{
+                Guid? id = _facialService.GetFaceId(face);
+            //});
 
             if (id != null)
             {

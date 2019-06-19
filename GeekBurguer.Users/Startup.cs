@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GeekBurguer.Users.Polly;
 using GeekBurguer.Users.Repository;
 using GeekBurguer.Users.Services;
 using Microsoft.AspNetCore.Builder;
@@ -42,9 +43,13 @@ namespace GeekBurguer.Users
             
             services.AddSingleton<ILogService, LogService>();
 
+            // POlly
+            services.AddPollyPolicies();
+
             services.AddSwaggerGen(c =>
                 c.SwaggerDoc("v1", new Info { Title = "Users", Version = "v1" })
             );
+
 
         }
 
