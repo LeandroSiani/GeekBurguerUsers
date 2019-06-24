@@ -5,14 +5,21 @@ using GeekBurguer.Users.Polly;
 using GeekBurguer.Users.Repository;
 using GeekBurguer.Users.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Polly;
 using Polly.Registry;
+using Polly.Retry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using GeekBurguer.Users.Extensions;
+using Microsoft.AspNetCore.Http;
 
 namespace GeekBurguer.Users.Controllers
 {
@@ -26,9 +33,13 @@ namespace GeekBurguer.Users.Controllers
         private IUserRetrievedService _userRetrievedService;
         private ILogService _logService;
         private readonly IReadOnlyPolicyRegistry<string> _policyRegistry;
+		public string _baseUri;
+		public IConfiguration _configuration;
+		private readonly ILogger _logger;
+		public string AddUserEndpoint;
 
-        public UsersController(IUsersRepository usersRepository, IFacialService facialService, IMapper mapper,
-            IUserRetrievedService userRetrievedService, ILogService logService, IReadOnlyPolicyRegistry<string> policyRegistry)
+		public UsersController(IUsersRepository usersRepository, IFacialService facialService, IMapper mapper,
+            IUserRetrievedService userRetrievedService, ILogService logService, IReadOnlyPolicyRegistry<string> policyRegistry, IConfiguration configuration, ILogger logger)
         {
             _usersRepository = usersRepository;
             _facialService = facialService;
@@ -36,7 +47,11 @@ namespace GeekBurguer.Users.Controllers
             _userRetrievedService = userRetrievedService;
             _logService = logService;
             _policyRegistry = policyRegistry;
-        }
+			_configuration = configuration;
+			_baseUri = _configuration.GetSection("BaseUri").Value;
+			_logger = logger;
+			AddUserEndpoint = _configuration.GetSection("AddUserEndpoint").Value;
+		}
 
         [HttpGet]
         public ActionResult<User> GetUserById(Guid id)
@@ -86,17 +101,43 @@ namespace GeekBurguer.Users.Controllers
 
         private async void AddUser(UserToPost userPost)
         {
-            var face = userPost.Face;
+			// cria o byte data pra enviar o objeto
+			var client = new HttpClient();
+			var byteData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(userPost));
 
-            //var retryPolicy = _policyRegistry.Get<IAsyncPolicy<HttpResponseMessage>>(PolicyNames.BasicRetry)
-            //                  ?? Policy.NoOpAsync<HttpResponseMessage>();
+			var content = new ByteArrayContent(byteData);
 
-            //var retries = 0;
-            //// ReSharper disable once AccessToDisposedClosure
-            //await retryPolicy.ExecuteAsync((ctx) =>
-            //{
-                Guid? id = _facialService.GetFaceId(face);
-            //});
+			content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+			var retryPolicy = _policyRegistry.Get<IAsyncPolicy<HttpResponseMessage>>(PolicyNames.BasicRetry)
+							 ?? Policy.NoOpAsync<HttpResponseMessage>();
+
+			var context = new Context($"GetSomeData-{Guid.NewGuid()}", new Dictionary<string, object>
+				{
+					{ PolicyContextItems.Logger, _logger }, { "url", _baseUri }
+				});
+
+			var retries = 0;
+			var response = await retryPolicy.ExecuteAsync((ctx) =>
+			{
+				client.DefaultRequestHeaders.Remove("retries");
+				client.DefaultRequestHeaders.Add("retries", new[] { retries++.ToString() });
+
+				var baseUrl = _baseUri;
+				if (string.IsNullOrWhiteSpace(baseUrl))
+				{
+					var uri = GetUri();
+					baseUrl = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
+				}
+
+				var isValid = Uri.IsWellFormedUriString(baseUrl, UriKind.Absolute);
+
+				return client.PostAsync(isValid ? $"{baseUrl}{AddUserEndpoint}" : $"{baseUrl}/api/user", content);
+			}, context);
+
+			var face = userPost.Face;
+
+           Guid? id = _facialService.GetFaceId(face);
 
             if (id != null)
             {
@@ -120,6 +161,17 @@ namespace GeekBurguer.Users.Controllers
                 _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face");
             }
         }
-    }
+
+		private static Uri GetUri()
+		{
+			var request = Request;
+			var builder = new UriBuilder();
+			builder.Scheme = request.Scheme;
+			builder.Host = request.Host.Value;
+			builder.Path = request.Path;
+			builder.Query = request.QueryString.ToUriComponent();
+			return builder.Uri;
+		}
+	}
 
 }
