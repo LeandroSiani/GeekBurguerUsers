@@ -5,7 +5,6 @@ using GeekBurguer.Users.Polly;
 using GeekBurguer.Users.Repository;
 using GeekBurguer.Users.Services;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -59,21 +58,24 @@ namespace GeekBurguer.Users.Controllers
 		}
 
 		[HttpPost]
-		public async IActionResult Post([FromBody]UserToPost userPost)
+		public IActionResult Post([FromBody]UserToPost userPost)
+		//public async Task<IActionResult> Post([FromBody]UserToPost userPost)
 		{
-			// tenta chamar a api de reconhecimento com o polly
+			AddUser(userPost);
+			return Ok("Processando");
+			/*			// tenta chamar a api de reconhecimento com o polly
 			var response = PostToAPI(userPost).Result;
-
-			AddUser(JsonConvert.DeserializeObject<UserToPost>(await response.Content.ReadAsStringAsync()));
 
 			if (response.IsSuccessStatusCode)
 			{
+				AddUser(JsonConvert.DeserializeObject<UserToPost>(await response.Content.ReadAsStringAsync()));
 				return Ok("Processando");
 			}
 			else
 			{
 				return BadRequest("Ocorreu um erro com a sua requisição");
 			}
+			*/
 		}
 
 		private void AddUser(UserToPost userToPost)
@@ -106,11 +108,60 @@ namespace GeekBurguer.Users.Controllers
 		}
 
 		[HttpPost("foodRestrictions")]
-		public ActionResult Post([FromBody]UserRestrictionsToPost foodRestrictions)
+		public async Task<IActionResult> Post([FromBody]UserRestrictionsToPost foodRestrictions)
 		{
-			GravarRestricoes(foodRestrictions);
-			return Ok("Processando");
+			var response = PostRestricoes(foodRestrictions).Result;
 
+			if (response.IsSuccessStatusCode)
+			{
+				GravarRestricoes(foodRestrictions);
+				return Ok();
+			}
+			else
+			{
+				return BadRequest();
+			}
+		}
+
+		private async Task<HttpResponseMessage> PostRestricoes(UserRestrictionsToPost foodRestrictions)
+		{
+			var client = new HttpClient();
+			var byteData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(foodRestrictions));
+
+			var content = new ByteArrayContent(byteData);
+
+			content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+			var retryPolicy = _policyRegistry.Get<IAsyncPolicy<HttpResponseMessage>>(PolicyNames.BasicRetry)
+							  ?? Policy.NoOpAsync<HttpResponseMessage>();
+
+			var context = new Context($"foodRestrictions-{Guid.NewGuid()}", new Dictionary<string, object>
+				{
+					{ PolicyContextItems.Logger, _logger }, { "url", Request.GetUri() }
+				});
+
+			var retries = 0;
+			// ReSharper disable once AccessToDisposedClosure
+			var response = await retryPolicy.ExecuteAsync((ctx) =>
+			{
+				client.DefaultRequestHeaders.Remove("retries");
+				client.DefaultRequestHeaders.Add("retries", new[] { retries++.ToString() });
+
+				var baseUrl = _baseUri;
+				if (string.IsNullOrWhiteSpace(baseUrl))
+				{
+					var uri = Request.GetUri();
+					baseUrl = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
+				}
+
+				//var isValid = Uri.IsWellFormedUriString(apiUrl, UriKind.Absolute);
+				//return client.PostAsync(isValid ? $"{baseUrl}{apiUrl}" : $"{baseUrl}/api/Face", content);
+				return client.PostAsync($"{baseUrl}/api/foodRestrictions", content);
+			}, context);
+
+			content.Dispose();
+
+			return response;
 		}
 
 		private async void GravarRestricoes(UserRestrictionsToPost foodRestrictions)
