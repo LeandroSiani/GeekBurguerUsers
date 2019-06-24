@@ -4,6 +4,8 @@ using GeekBurguer.Users.Models;
 using GeekBurguer.Users.Polly;
 using GeekBurguer.Users.Repository;
 using GeekBurguer.Users.Services;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -16,6 +18,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+//using GeekBurguer.Users.Extensions;
 
 namespace GeekBurguer.Users.Controllers
 {
@@ -162,7 +165,7 @@ namespace GeekBurguer.Users.Controllers
 				var baseUrl = _baseUri;
 				if (string.IsNullOrWhiteSpace(baseUrl))
 				{
-					var uri = GetUri();
+					var uri = Request.GetUri();
 					baseUrl = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
 				}
 
@@ -173,17 +176,5 @@ namespace GeekBurguer.Users.Controllers
 
 			return response;
 		}
-
-		private static Uri GetUri()
-		{
-			var request = Request;
-			var builder = new UriBuilder();
-			builder.Scheme = request.Scheme;
-			builder.Host = request.Host.Value;
-			builder.Path = request.Path;
-			builder.Query = request.QueryString.ToUriComponent();
-			return builder.Uri;
-		}
 	}
-
 }
