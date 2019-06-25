@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace GeekBurguer.Users
@@ -17,14 +18,14 @@ namespace GeekBurguer.Users
         public IConfiguration Configuration { get; }
         public IHostingEnvironment HostingEnvironment;
 
-        public Startup(IConfiguration configuration, IHostingEnvironment env)
-        {
-            Configuration = configuration;
-            HostingEnvironment = env;
-        }        
+		public Startup(IConfiguration configuration, IHostingEnvironment env)
+		{
+			Configuration = configuration;
+			HostingEnvironment = env;
+		}
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+		// This method gets called by the runtime. Use this method to add services to the container.
+		public void ConfigureServices(IServiceCollection services)
         {
             services.AddAutoMapper(typeof(Startup));
             
@@ -43,15 +44,13 @@ namespace GeekBurguer.Users
             
             services.AddSingleton<ILogService, LogService>();
 
-            // POlly
-            services.AddPollyPolicies();
+			// POlly
+			services.AddPollyPolicies();
 
             services.AddSwaggerGen(c =>
                 c.SwaggerDoc("v1", new Info { Title = "Users", Version = "v1" })
             );
-
-
-        }
+		}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env/*, UsersDbContext usersDbContext*/)

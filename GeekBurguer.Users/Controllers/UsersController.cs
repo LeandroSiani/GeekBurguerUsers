@@ -37,7 +37,7 @@ namespace GeekBurguer.Users.Controllers
 		public string AddUserEndpoint;
 
 		public UsersController(IUsersRepository usersRepository, IFacialService facialService, IMapper mapper,
-			IUserRetrievedService userRetrievedService, ILogService logService, IReadOnlyPolicyRegistry<string> policyRegistry, IConfiguration configuration, ILogger logger)
+			IUserRetrievedService userRetrievedService, ILogService logService, IReadOnlyPolicyRegistry<string> policyRegistry, IConfiguration configuration, ILogger<UsersController> logger)
 		{
 			_usersRepository = usersRepository;
 			_facialService = facialService;
@@ -135,14 +135,32 @@ namespace GeekBurguer.Users.Controllers
 			var retryPolicy = _policyRegistry.Get<IAsyncPolicy<HttpResponseMessage>>(PolicyNames.BasicRetry)
 							  ?? Policy.NoOpAsync<HttpResponseMessage>();
 
+			//var retries = 0;
+			//// ReSharper disable once AccessToDisposedClosure
+			//var response = await retryPolicy.ExecuteAsync((ctx) =>
+			//{
+			//	client.DefaultRequestHeaders.Remove("retries");
+			//	client.DefaultRequestHeaders.Add("retries", new[] { retries++.ToString() });
+
+			//	var baseUrl = _baseUri;
+			//	if (string.IsNullOrWhiteSpace(baseUrl))
+			//	{
+			//		var uri = Request.GetUri();
+			//		baseUrl = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
+			//	}
+
+			//	//var isValid = Uri.IsWellFormedUriString(apiUrl, UriKind.Absolute);
+			//	//return client.PostAsync(isValid ? $"{baseUrl}{apiUrl}" : $"{baseUrl}/api/Face", content);
+			//	return client.PostAsync($"{baseUrl}/api/foodRestrictions", content);
+			//}, context);
+
 			var context = new Context($"foodRestrictions-{Guid.NewGuid()}", new Dictionary<string, object>
 				{
 					{ PolicyContextItems.Logger, _logger }, { "url", Request.GetUri() }
 				});
 
 			var retries = 0;
-			// ReSharper disable once AccessToDisposedClosure
-			var response = await retryPolicy.ExecuteAsync((ctx) =>
+			var response = await retryPolicy.ExecuteAsync((ctx) => 
 			{
 				client.DefaultRequestHeaders.Remove("retries");
 				client.DefaultRequestHeaders.Add("retries", new[] { retries++.ToString() });
@@ -154,10 +172,9 @@ namespace GeekBurguer.Users.Controllers
 					baseUrl = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
 				}
 
-				//var isValid = Uri.IsWellFormedUriString(apiUrl, UriKind.Absolute);
-				//return client.PostAsync(isValid ? $"{baseUrl}{apiUrl}" : $"{baseUrl}/api/Face", content);
-				return client.PostAsync($"{baseUrl}/api/foodRestrictions", content);
+				return client.PostAsync($"{baseUrl}/users/foodRestrictions", content);
 			}, context);
+			
 
 			content.Dispose();
 
@@ -189,43 +206,43 @@ namespace GeekBurguer.Users.Controllers
 			}
 		}
 
-		private async Task<HttpResponseMessage> PostToAPI(UserToPost userPost)
-		{
-			// cria o byte data pra enviar o objeto
-			var client = new HttpClient();
-			var byteData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(userPost));
+		//private async Task<HttpResponseMessage> PostToAPI(UserToPost userPost)
+		//{
+		//	// cria o byte data pra enviar o objeto
+		//	var client = new HttpClient();
+		//	var byteData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(userPost));
 
-			var content = new ByteArrayContent(byteData);
+		//	var content = new ByteArrayContent(byteData);
 
-			content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+		//	content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-			var retryPolicy = _policyRegistry.Get<IAsyncPolicy<HttpResponseMessage>>(PolicyNames.BasicRetry)
-							 ?? Policy.NoOpAsync<HttpResponseMessage>();
+		//	var retryPolicy = _policyRegistry.Get<IAsyncPolicy<HttpResponseMessage>>(PolicyNames.BasicRetry)
+		//					 ?? Policy.NoOpAsync<HttpResponseMessage>();
 
-			var context = new Context($"GetSomeData-{Guid.NewGuid()}", new Dictionary<string, object>
-				{
-					{ PolicyContextItems.Logger, _logger }, { "url", _baseUri }
-				});
+		//	var context = new Context($"GetSomeData-{Guid.NewGuid()}", new Dictionary<string, object>
+		//		{
+		//			{ PolicyContextItems.Logger, _logger }, { "url", _baseUri }
+		//		});
 
-			var retries = 0;
-			var response = await retryPolicy.ExecuteAsync((ctx) =>
-			{
-				client.DefaultRequestHeaders.Remove("retries");
-				client.DefaultRequestHeaders.Add("retries", new[] { retries++.ToString() });
+		//	var retries = 0;
+		//	var response = await retryPolicy.ExecuteAsync((ctx) =>
+		//	{
+		//		client.DefaultRequestHeaders.Remove("retries");
+		//		client.DefaultRequestHeaders.Add("retries", new[] { retries++.ToString() });
 
-				var baseUrl = _baseUri;
-				if (string.IsNullOrWhiteSpace(baseUrl))
-				{
-					var uri = Request.GetUri();
-					baseUrl = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
-				}
+		//		var baseUrl = _baseUri;
+		//		if (string.IsNullOrWhiteSpace(baseUrl))
+		//		{
+		//			var uri = Request.GetUri();
+		//			baseUrl = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
+		//		}
 
-				var isValid = Uri.IsWellFormedUriString(baseUrl, UriKind.Absolute);
+		//		var isValid = Uri.IsWellFormedUriString(baseUrl, UriKind.Absolute);
 
-				return client.PostAsync(isValid ? $"{baseUrl}{AddUserEndpoint}" : $"{baseUrl}/api/user", content);
-			}, context);
+		//		return client.PostAsync(isValid ? $"{baseUrl}{AddUserEndpoint}" : $"{baseUrl}/api/user", content);
+		//	}, context);
 
-			return response;
-		}
+		//	return response;
+		//}
 	}
 }
