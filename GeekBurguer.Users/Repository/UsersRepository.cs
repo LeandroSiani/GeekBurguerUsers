@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using GeekBurguer.Users.Models;
+using GeekBurguer.Users.Polly;
 using GeekBurguer.Users.Services;
 using Microsoft.EntityFrameworkCore;
+using Polly;
+using Polly.Registry;
 
 namespace GeekBurguer.Users.Repository
 {
@@ -11,11 +15,13 @@ namespace GeekBurguer.Users.Repository
     {
         private UsersDbContext _dbContext;
         public IUserRetrievedService _userRetrievedService;
+        private readonly IReadOnlyPolicyRegistry<string> _policyRegistry;
 
-        public UsersRepository(UsersDbContext dbContext, IUserRetrievedService userRetrievedService)
+        public UsersRepository(UsersDbContext dbContext, IUserRetrievedService userRetrievedService, IReadOnlyPolicyRegistry<string> policyRegistry)
         {
             _dbContext = dbContext;
             _userRetrievedService = userRetrievedService;
+            _policyRegistry = policyRegistry;
         }
 
         public bool Add(User user)
@@ -38,12 +44,12 @@ namespace GeekBurguer.Users.Repository
 
         public void SendMessage(bool exists)
         {
+
             if (exists)
                 _userRetrievedService.AddToMessageListExits(_dbContext.ChangeTracker.Entries<User>());
             else
                 _userRetrievedService.AddToMessageList(_dbContext.ChangeTracker.Entries<User>());
-
-            _userRetrievedService.SendMessagesAsync();
+            
         }
 
         public bool UpdateRestricoes(User user)

@@ -17,6 +17,9 @@ using Newtonsoft.Json;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using GeekBurguer.Users.Contract;
+using Polly.Registry;
+using Polly;
+using GeekBurguer.Users.Polly;
 
 namespace GeekBurguer.Users.Services
 {
@@ -30,11 +33,13 @@ namespace GeekBurguer.Users.Services
         private readonly IServiceBusNamespace _namespace;        
         private CancellationTokenSource _cancelMessages;
         private IServiceProvider _serviceProvider { get; }
-        
-        
+        private readonly IReadOnlyPolicyRegistry<string> _policyRegistry;
+
+
 
         public UserRetrievedService(IMapper mapper,
-    IConfiguration configuration, IServiceProvider serviceProvider)
+    IConfiguration configuration, IServiceProvider serviceProvider,
+    IReadOnlyPolicyRegistry<string> policyRegistry)
         {
             _mapper = mapper;
             _configuration = configuration;
@@ -42,7 +47,8 @@ namespace GeekBurguer.Users.Services
             _messages = new List<Message>();
             _namespace = _configuration.GetServiceBusNamespace();
             _cancelMessages = new CancellationTokenSource();
-            _serviceProvider = serviceProvider;            
+            _serviceProvider = serviceProvider;
+            _policyRegistry = policyRegistry;
         }
 
         public async void SendMessagesAsync()
@@ -51,8 +57,8 @@ namespace GeekBurguer.Users.Services
                 return;
 
             var config = _configuration.GetSection("serviceBus").Get<ServiceBusConfiguration>();
-            var topicClient = new TopicClient(config.ConnectionString, Topic);            
-
+            var topicClient = new TopicClient(config.ConnectionString, Topic);
+            
             _lastTask = SendAsync(topicClient, _cancelMessages.Token);
 
             await _lastTask;

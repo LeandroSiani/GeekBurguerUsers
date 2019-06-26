@@ -61,7 +61,7 @@ namespace GeekBurguer.Users.Controllers
 		public IActionResult Post([FromBody]UserToPost userPost)
 		//public async Task<IActionResult> Post([FromBody]UserToPost userPost)
 		{
-			AddUser(userPost);
+			AddUserAsync(userPost);
 			return Ok("Processando");
 			/*			// tenta chamar a api de reconhecimento com o polly
 			var response = PostToAPI(userPost).Result;
@@ -78,41 +78,54 @@ namespace GeekBurguer.Users.Controllers
 			*/
 		}
 
-		private void AddUser(UserToPost userToPost)
+        private Policy CheckApiFaces()
+        {        
+            return Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(3, retryCount => TimeSpan.FromSeconds(Math.Pow(2, retryCount)), (result, timeSpan, retryCount, context) =>
+                {                    
+                    _logger.LogError(result, "Ocorreu um erro na tentativa {RetryAttempt} para a politica {PolicyKey}", retryCount, context.PolicyKey);
+                }).WithPolicyKey(PolicyNames.BasicRetry);
+        }
+
+        private async Task AddUserAsync(UserToPost userToPost)
 		{
 			var face = userToPost.Face;
+            var policy = CheckApiFaces();
+            Guid? id = policy.ExecuteAsync(async () => _facialService.GetFaceId(userToPost.Face)).Result;            
 
-			Guid? id = _facialService.GetFaceId(face);
+            //Guid? id = _facialService.GetFaceId(face);
 
-			if (id != null)
+            if (id != null)
 			{
 				var user = _usersRepository.GetUserById(id);
 				if (user == null)
 				{
 					user = new User() { Id = id, Face = face, Restricoes = null };
-					_usersRepository.Add(user);
-					_usersRepository.Save();
-					_logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - usuário '{user.Id}' criado com sucesso!");
-					//return Created("users/" + user.Id, user);
-				}
+					
+                    await policy.ExecuteAsync(async () => {
+                        _usersRepository.Add(user);
+                        _usersRepository.Save();                        
+                    });
+                    await policy.ExecuteAsync(async () => _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face"));
+                    //return Created("users/" + user.Id, user);
+                }
 				else
 				{
-					_usersRepository.SendMessage(true);
-				}
+                    await policy.ExecuteAsync(async () => _usersRepository.SendMessage(true));
+                }
 			}
 			else
 			{
-				//"Esta imagem não contem uma face"
-				_logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face");
-			}
+                //"Esta imagem não contem uma face"
+                await policy.ExecuteAsync(async () => _logService.SendMessagesAsync($"{DateTime.Now.Year}{DateTime.Now.Month}{DateTime.Now.Day} {DateTime.Now.Hour} {DateTime.Now.Minute} USER - Esta imagem não contem uma face"));
+            }
 		}
 
 		[HttpPost("foodRestrictions")]
 		public async Task<IActionResult> Post([FromBody]UserRestrictionsToPost foodRestrictions)
 		{
-			var response = PostRestricoes(foodRestrictions).Result;
-
-			if (response.IsSuccessStatusCode)
+			if (ModelState.IsValid)
 			{
 				GravarRestricoes(foodRestrictions);
 				return Ok();
