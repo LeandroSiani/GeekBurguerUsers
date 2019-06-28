@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekBurguer.Users.Contract"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekBurguer.Users", "GeekBurguer.Users\GeekBurguer.Users.csproj", "{026DE0B8-5B04-4E66-B83D-ECB15FE61A9F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekBurguer.Users.Tests", "GeekBurguer.Users.Tests\GeekBurguer.Users.Tests.csproj", "{853098A1-4968-4957-BE76-FBDF037286DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{026DE0B8-5B04-4E66-B83D-ECB15FE61A9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{026DE0B8-5B04-4E66-B83D-ECB15FE61A9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{026DE0B8-5B04-4E66-B83D-ECB15FE61A9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{853098A1-4968-4957-BE76-FBDF037286DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{853098A1-4968-4957-BE76-FBDF037286DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{853098A1-4968-4957-BE76-FBDF037286DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{853098A1-4968-4957-BE76-FBDF037286DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
